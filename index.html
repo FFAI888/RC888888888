@@ -1,28 +1,26 @@
-<!-- version: v0.02 -->
+<!-- version: v0.03 -->
 <!DOCTYPE html>
 <html lang="zh">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>登录</title>
-
-  <!-- 主题色：H214 S97 B100 => 主色 #0873FF / 副色 #0762D9 -->
+  <!-- 主题色（可按需改）：H214 S97 B100 → #0873FF / #0762D9 -->
   <style>
     :root{
-      --theme-main: #0873FF;
-      --theme-secondary: #0762D9;
+      --theme-main:#0873FF;
+      --theme-secondary:#0762D9;
     }
   </style>
-
-  <link rel="stylesheet" href="style.css?v=0.02" />
+  <link rel="stylesheet" href="style.css?v=0.03" />
 </head>
 <body>
-  <div id="verBadge" class="ver-badge">v0.02</div>
+  <div id="verBadge" class="ver-badge">v0.03</div>
 
   <main class="container">
     <div class="login-card">
       <h2>连接钱包登录</h2>
-      <p class="sub">请使用钱包内置浏览器打开（仅支持 BSC 主网 56）</p>
+      <p class="sub">仅支持 BSC 主网（56）</p>
       <button id="connectBtn" class="btn-primary">🔗 连接钱包</button>
       <p id="status" class="status">状态：未连接</p>
     </div>
@@ -31,6 +29,6 @@
   <!-- 顶部弹窗容器 -->
   <div id="toast" class="toast" aria-live="polite"></div>
 
-  <script src="app.js?v=0.02"></script>
+  <script src="app.js?v=0.03"></script>
 </body>
 </html>
