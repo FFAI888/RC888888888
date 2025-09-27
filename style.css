@@ -1,4 +1,4 @@
-/* version: v0.04 — 登录页卡片留白/阴影/配色优化；弹窗动效更顺滑 */
+/* version: v0.05 — 放大登录卡片上下间距；按钮换色并加大尺寸（不改其它功能样式） */
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{
   height:100%;
@@ -15,37 +15,42 @@ button{-webkit-tap-highlight-color:transparent;cursor:pointer}
   padding:4px 8px;border-radius:6px;font-size:12px;z-index:10
 }
 
-/* 登录卡片：整体下移 + 更大上下留白 + 主题高光阴影 + 细腻边框 */
+/* 登录卡片：整体更下移，上下留白更大，触控更舒服 */
 .login-card{
   max-width:420px;
-  /* 下移一些，兼容刘海区 */
-  margin: calc(24vh + env(safe-area-inset-top, 0px)) auto 0;
+  /* 上方：更下移；下方：额外留白，避免底部贴边 */
+  margin: calc(28vh + env(safe-area-inset-top, 0px)) auto 10vh;
   background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
-  padding: 34px 24px;
-  border-radius: 18px;
+  /* 内边距更大 */
+  padding: 40px 26px;
+  border-radius: 20px;
   text-align:center;
   border:1px solid rgba(255,255,255,.22);
   box-shadow: 0 16px 38px var(--theme-shadow, rgba(8,115,255,.35)), 0 2px 10px rgba(0,0,0,.14);
   backdrop-filter: blur(10px);
 }
-.login-card h2{font-size:21px;margin-bottom:10px;letter-spacing:.2px}
-.sub{font-size:13px;opacity:.92;margin-bottom:18px}
-.status{font-size:13px;opacity:.96;margin-top:12px}
+.login-card h2{font-size:21px;margin-bottom:12px;letter-spacing:.2px}
+.sub{font-size:13px;opacity:.92;margin-bottom:20px}
+.status{font-size:13px;opacity:.96;margin-top:14px}
 
-/* 按钮：保持一致，仅微调权重与按压反馈 */
+/* 按钮：换为更亮的蓝青渐变 + 更大尺寸 + 更强触控目标 */
 .btn-primary,.btn-danger{
-  border:none;border-radius:12px;padding:13px 16px;font-size:15px;font-weight:700;color:#fff;
+  border:none;border-radius:14px;padding:16px 18px;font-size:16px;font-weight:800;color:#fff;
   transition: transform .06s ease, filter .12s ease, box-shadow .12s ease
 }
 .btn-primary{
-  background:linear-gradient(180deg, var(--theme-main,#0873FF), var(--theme-secondary,#0762D9));
-  box-shadow:0 10px 20px var(--theme-shadow, rgba(8,115,255,.35));
+  /* 使用按钮变量；若未设置则回退到主题色变量 */
+  background:linear-gradient(180deg, var(--btn-main, var(--theme-main,#0873FF)), var(--btn-secondary, var(--theme-secondary,#0762D9)));
+  box-shadow:0 12px 22px var(--theme-shadow, rgba(8,115,255,.35));
+  width:100%; min-height:52px; /* 放大触控目标 */
 }
-.btn-primary:hover{filter:brightness(1.06)}
-.btn-primary:active{transform:scale(.985)}
+.btn-primary:hover{filter:brightness(1.07)}
+.btn-primary:active{transform:scale(.983)}
+
 .btn-danger{
   background:linear-gradient(180deg,#ff6a6a,#f44336);
-  box-shadow:0 10px 20px rgba(244,67,54,.35);
+  box-shadow:0 12px 22px rgba(244,67,54,.35);
+  min-height:48px;
 }
 .btn-danger:hover{filter:brightness(1.05)}
 .btn-danger:active{transform:scale(.985)}
@@ -62,7 +67,7 @@ button{-webkit-tap-highlight-color:transparent;cursor:pointer}
 }
 .panel h3{font-size:16px;margin-bottom:6px}
 
-/* 顶部弹窗：动效更柔和（轻微下滑 + 淡入 + 小尺度） */
+/* 顶部弹窗（沿用上一版更顺滑动效） */
 .toast{
   position:fixed;left:50%;
   top:14px;z-index:9999;min-width:70%;max-width:92%;
@@ -81,3 +86,8 @@ button{-webkit-tap-highlight-color:transparent;cursor:pointer}
 .toast.warn{background:linear-gradient(135deg,rgba(255,157,5,.95),rgba(241,117,2,.95))}
 .toast.success{background:linear-gradient(135deg,rgba(28,185,98,.95),rgba(17,146,76,.95))}
 .toast.error{background:linear-gradient(135deg,rgba(230,57,70,.95),rgba(200,42,55,.95))}
+
+/* 小屏/矮屏优化：高度太小时稍微上移，避免超出 */
+@media (max-height:700px){
+  .login-card{ margin: calc(20vh + env(safe-area-inset-top, 0px)) auto 8vh; padding:34px 22px; }
+}
