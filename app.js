@@ -1,5 +1,5 @@
-// version: v0.05 —— 同步版本号；所有连接/鉴权/只支持 BSC/切链等逻辑与 v0.04 完全一致
-const APP_VERSION = "v0.05";
+// version: v0.07 —— 仅同步版本号；所有连接/鉴权/只支持 BSC/切链等逻辑保持与 v0.06 完全一致
+const APP_VERSION = "v0.07";
 const LS_SESSION  = "session-min"; // { addr, ts }
 const BSC_HEX     = "0x38";
 const BSC_INFO    = {
@@ -27,7 +27,7 @@ function showToast(msg, type="info", ms=2600){
   el.__timer = setTimeout(()=> el.classList.remove("show"), ms);
 }
 
-/* —— 以下逻辑完全沿用 v0.04 —— */
+/* —— 以下逻辑完整沿用 v0.06，不做改动 —— */
 async function waitForProvider(maxMs=2000){
   const start = Date.now();
   while(!window.ethereum){
