@@ -1,7 +1,7 @@
-// version: v0.04 —— 仅同步版本号；所有连接/鉴权/只支持 BSC/切链等逻辑完全沿用 v0.03
-const APP_VERSION = "v0.04";
+// version: v0.05 —— 同步版本号；所有连接/鉴权/只支持 BSC/切链等逻辑与 v0.04 完全一致
+const APP_VERSION = "v0.05";
 const LS_SESSION  = "session-min"; // { addr, ts }
-const BSC_HEX     = "0x38";        // 56
+const BSC_HEX     = "0x38";
 const BSC_INFO    = {
   chainId: "0x38",
   chainName: "BNB Smart Chain",
@@ -27,7 +27,7 @@ function showToast(msg, type="info", ms=2600){
   el.__timer = setTimeout(()=> el.classList.remove("show"), ms);
 }
 
-/* —— 以下逻辑与 v0.03 保持一致 —— */
+/* —— 以下逻辑完全沿用 v0.04 —— */
 async function waitForProvider(maxMs=2000){
   const start = Date.now();
   while(!window.ethereum){
@@ -75,7 +75,10 @@ async function switchToBSC(){
   }catch(err){
     if(err && (err.code === 4902 || err.message?.includes("Unrecognized chain ID"))){
       try{
-        await window.ethereum.request({ method:"wallet_addEthereumChain", params:[BSC_INFO] });
+        await window.ethereum.request({ method:"wallet_addEthereumChain", params:[{
+          chainId: BSC_INFO.chainId, chainName: BSC_INFO.chainName, nativeCurrency: BSC_INFO.nativeCurrency,
+          rpcUrls: BSC_INFO.rpcUrls, blockExplorerUrls: BSC_INFO.blockExplorerUrls
+        }] });
         return true;
       }catch(e2){ showToast("添加 BSC 失败："+(e2?.message||e2), "error", 3000); return false; }
     }
