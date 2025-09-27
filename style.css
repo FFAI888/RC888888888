@@ -1,4 +1,4 @@
-/* version: v0.09 — 按钮环光/红点、微气泡、分步条、夜间护眼等；保留全部旧样式 */
+/* version: v0.10 — 卡片更高、更厚；新增 app-logo / welcome；保留全部旧效果与逻辑 */
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{
   height:100%;
@@ -18,26 +18,38 @@ button{-webkit-tap-highlight-color:transparent;cursor:pointer}
   padding:4px 8px;border-radius:6px;font-size:12px;z-index:10
 }
 
-/* 登录卡片（保留 v0.08 内容 + v0.07 的卡片增高） */
+/* 登录卡片：在 v0.09 基础上提高高度与内边距 */
 .login-card{
   position:relative;
-  max-width:440px;
-  margin: calc(32vh + env(safe-area-inset-top, 0px)) auto 12vh;
+  max-width:480px;
+  margin: calc(30vh + env(safe-area-inset-top, 0px)) auto 12vh;
   background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
-  padding: 46px 28px;
+  padding: 56px 28px;             /* ↑ 更厚，容纳图标与欢迎语 */
   border-radius: 22px;
   text-align:center;
   border:1px solid rgba(255,255,255,.22);
   box-shadow: 0 18px 42px var(--theme-shadow, rgba(8,115,255,.35)), 0 2px 12px rgba(0,0,0,.16);
   backdrop-filter: blur(10px);
-  min-height: clamp(380px, 56vh, 600px);
+  min-height: clamp(460px, 62vh, 720px);   /* ↑ 卡片自身面积更大 */
   display:flex;flex-direction:column;justify-content:center;
 }
-.login-card h2{font-size:22px;margin-bottom:14px;letter-spacing:.2px}
+
+/* App 图标（新增） */
+.app-logo{
+  width:88px;height:88px;border-radius:20px;object-fit:cover;
+  margin:0 auto 14px; box-shadow:0 8px 22px rgba(0,0,0,.28)
+}
+
+.login-card h2{font-size:22px;margin-bottom:10px;letter-spacing:.2px}
+
+/* 欢迎语（新增） */
+.welcome{ font-size:14px; opacity:.95; margin-bottom:14px }
+
+/* 既有副标题/状态 */
 .sub{font-size:13px;opacity:.92;margin-bottom:14px}
 .status{font-size:13px;opacity:.96;margin-top:14px}
 
-/* —— 按钮（保留旧尺寸/渐变） —— */
+/* —— 按钮（保持 v0.09 全部交互效果） —— */
 .btn-primary,.btn-danger{
   border:none;border-radius:14px;padding:16px 18px;font-size:16px;font-weight:800;color:#fff;
   transition: transform .1s ease, filter .12s ease, box-shadow .12s ease
@@ -62,7 +74,7 @@ button{-webkit-tap-highlight-color:transparent;cursor:pointer}
 @keyframes pulsebtn { 0%,100%{transform:scale(1)} 50%{transform:scale(1.01)} }
 .btn-primary.pulse{ animation: pulsebtn 3.2s ease-in-out infinite }
 
-/* 5 扫光（之前已实现，保留） */
+/* 扫光（保留） */
 @keyframes shimmer {
   0%  { transform: translateX(-130%) skewX(-15deg); opacity:.0 }
   15% { opacity:.35 }
@@ -78,7 +90,7 @@ button{-webkit-tap-highlight-color:transparent;cursor:pointer}
   pointer-events:none;
 }
 
-/* C 加载旋转（保留） */
+/* 加载旋转（保留） */
 @keyframes spin { to { transform: rotate(360deg); } }
 .btn-primary.is-loading{ filter:brightness(.98); }
 .btn-primary.is-loading::after{
@@ -88,13 +100,13 @@ button{-webkit-tap-highlight-color:transparent;cursor:pointer}
   animation: spin .8s linear infinite;
 }
 
-/* D 成功态（保留） */
+/* 成功态（保留） */
 .btn-primary.is-success{
   background:linear-gradient(180deg,#3bd671,#12b160);
   box-shadow:0 12px 22px rgba(18,177,96,.35);
 }
 
-/* 10 错误摇动（保留） */
+/* 错误摇动（保留） */
 @keyframes btnshake {
   0%,100% { transform: translateX(0) }
   20% { transform: translateX(-4px) }
@@ -104,7 +116,7 @@ button{-webkit-tap-highlight-color:transparent;cursor:pointer}
 }
 .btn-primary.shake{ animation: btnshake .32s ease }
 
-/* 33 网络可用光环 / 不可用红点 */
+/* 网络光环/红点（保留） */
 .btn-primary.net-ok{
   box-shadow:
     0 0 0 3px rgba(255,255,255,.15),
@@ -116,7 +128,7 @@ button{-webkit-tap-highlight-color:transparent;cursor:pointer}
   background:#ff5252; box-shadow:0 0 0 2px rgba(0,0,0,.25);
 }
 
-/* 20 微气泡提示 */
+/* 微气泡提示（保留） */
 .tip{
   display:none; margin:10px auto 12px; padding:8px 12px; width:fit-content; max-width:90%;
   font-size:13px; line-height:1.3; color:#07223c;
@@ -127,7 +139,7 @@ button{-webkit-tap-highlight-color:transparent;cursor:pointer}
 .tip.error{ background:#FFE9E9; border-color:#FFC7C7; color:#4d0f0f; }
 .tip.warn{ background:#FFF7E6; border-color:#FFE4B3; color:#4d2f07; }
 
-/* 19 分步提示条 */
+/* 分步提示条（保留） */
 .steps{ margin-top:12px; text-align:left; }
 .steps[hidden]{ display:none !important; }
 .steps-bar{ position:relative; height:6px; border-radius:6px; background:rgba(255,255,255,.18); overflow:hidden; }
@@ -138,7 +150,7 @@ button{-webkit-tap-highlight-color:transparent;cursor:pointer}
 .step.done{ opacity:.95; }
 .step.error{ color:#ffd5d5; }
 
-/* 27 二次确认行 */
+/* 二次确认行（保留） */
 .confirm-line{ margin-top:10px; font-size:12px; opacity:.95 }
 .addr-preview{ opacity:.9 }
 .change-hint{ color:#fff; opacity:.8; text-decoration:underline }
@@ -172,12 +184,16 @@ button{-webkit-tap-highlight-color:transparent;cursor:pointer}
 .toast.success{background:linear-gradient(135deg,rgba(28,185,98,.95),rgba(17,146,76,.95))}
 .toast.error{background:linear-gradient(135deg,rgba(230,57,70,.95),rgba(200,42,55,.95))}
 
-/* 26 夜间护眼（22:00–06:00 降饱和） */
+/* 夜间护眼（保留） */
 body.night{ filter:saturate(.88) }
 body.night .btn-primary, body.night .btn-danger{ filter:saturate(.92) }
 body.night .btn-primary.is-success{ filter:saturate(.9) }
 
-/* 矮屏优化（保留） */
+/* 矮屏优化：更温和的缩小策略，避免溢出 */
 @media (max-height:700px){
-  .login-card{ margin: calc(24vh + env(safe-area-inset-top, 0px)) auto 10vh; padding:38px 24px; min-height: clamp(320px, 44vh, 460px); }
+  .login-card{
+    margin: calc(22vh + env(safe-area-inset-top, 0px)) auto 8vh;
+    padding:44px 24px;
+    min-height: clamp(380px, 52vh, 560px);
+  }
 }
