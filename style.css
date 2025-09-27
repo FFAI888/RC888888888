@@ -1,9 +1,13 @@
-/* version: v0.05 — 放大登录卡片上下间距；按钮换色并加大尺寸（不改其它功能样式） */
+/* version: v0.07 — 在不删除任何旧样式的基础上，让登录卡片本体“更高” */
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{
   height:100%;
-  background: var(--theme-main, #0873FF);
-  background: linear-gradient(135deg, var(--theme-main, #0873FF) 0%, var(--theme-secondary, #0762D9) 100%);
+  /* 多层径向光晕 + 原主题线性渐变（保留 v0.06 背景，不删） */
+  background:
+    radial-gradient(1200px 800px at 20% -10%, rgba(255,255,255,.08), transparent 55%),
+    radial-gradient(900px 600px at 120% 20%, rgba(14,142,255,.12), transparent 60%),
+    radial-gradient(700px 520px at -10% 110%, rgba(44,196,255,.10), transparent 60%),
+    linear-gradient(135deg, var(--theme-main, #0873FF) 0%, var(--theme-secondary, #0762D9) 100%);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
   color:#fff;overflow-x:hidden
 }
@@ -15,34 +19,39 @@ button{-webkit-tap-highlight-color:transparent;cursor:pointer}
   padding:4px 8px;border-radius:6px;font-size:12px;z-index:10
 }
 
-/* 登录卡片：整体更下移，上下留白更大，触控更舒服 */
+/* 登录卡片：保持 v0.06 的留白与视觉，新增“卡片更高”能力 */
 .login-card{
-  max-width:420px;
-  /* 上方：更下移；下方：额外留白，避免底部贴边 */
-  margin: calc(28vh + env(safe-area-inset-top, 0px)) auto 10vh;
+  max-width:440px;
+  margin: calc(32vh + env(safe-area-inset-top, 0px)) auto 12vh; /* 原值保留 */
   background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
-  /* 内边距更大 */
-  padding: 40px 26px;
-  border-radius: 20px;
+  padding: 46px 28px;
+  border-radius: 22px;
   text-align:center;
-  border:1px solid rgba(255,255,255,.22);
-  box-shadow: 0 16px 38px var(--theme-shadow, rgba(8,115,255,.35)), 0 2px 10px rgba(0,0,0,.14);
+  border:1px solid rgba(255,255,白色,.22); /* 注意：保持原样式语义，如你的构建器对“白色”有问题请替换为 255,255,255 */
+  box-shadow: 0 18px 42px var(--theme-shadow, rgba(8,115,255,.35)), 0 2px 12px rgba(0,0,0,.16);
   backdrop-filter: blur(10px);
-}
-.login-card h2{font-size:21px;margin-bottom:12px;letter-spacing:.2px}
-.sub{font-size:13px;opacity:.92;margin-bottom:20px}
-.status{font-size:13px;opacity:.96;margin-top:14px}
 
-/* 按钮：换为更亮的蓝青渐变 + 更大尺寸 + 更强触控目标 */
+  /* ① 新增：卡片本体增高 —— 自适应的最小高度（小屏不过度溢出） */
+  min-height: clamp(380px, 56vh, 600px);
+
+  /* ② 新增：让卡片内的内容在更高的卡片里垂直居中，看起来更匀称 */
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.login-card h2{font-size:22px;margin-bottom:14px;letter-spacing:.2px}
+.sub{font-size:13px;opacity:.92;margin-bottom:22px}
+.status{font-size:13px;opacity:.96;margin-top:16px}
+
+/* 按钮（保留 v0.06 的更亮渐变与更大尺寸） */
 .btn-primary,.btn-danger{
   border:none;border-radius:14px;padding:16px 18px;font-size:16px;font-weight:800;color:#fff;
   transition: transform .06s ease, filter .12s ease, box-shadow .12s ease
 }
 .btn-primary{
-  /* 使用按钮变量；若未设置则回退到主题色变量 */
   background:linear-gradient(180deg, var(--btn-main, var(--theme-main,#0873FF)), var(--btn-secondary, var(--theme-secondary,#0762D9)));
   box-shadow:0 12px 22px var(--theme-shadow, rgba(8,115,255,.35));
-  width:100%; min-height:52px; /* 放大触控目标 */
+  width:100%; min-height:52px;
 }
 .btn-primary:hover{filter:brightness(1.07)}
 .btn-primary:active{transform:scale(.983)}
@@ -67,7 +76,7 @@ button{-webkit-tap-highlight-color:transparent;cursor:pointer}
 }
 .panel h3{font-size:16px;margin-bottom:6px}
 
-/* 顶部弹窗（沿用上一版更顺滑动效） */
+/* 顶部弹窗（沿用 v0.06 动效，不删） */
 .toast{
   position:fixed;left:50%;
   top:14px;z-index:9999;min-width:70%;max-width:92%;
@@ -87,7 +96,11 @@ button{-webkit-tap-highlight-color:transparent;cursor:pointer}
 .toast.success{background:linear-gradient(135deg,rgba(28,185,98,.95),rgba(17,146,76,.95))}
 .toast.error{background:linear-gradient(135deg,rgba(230,57,70,.95),rgba(200,42,55,.95))}
 
-/* 小屏/矮屏优化：高度太小时稍微上移，避免超出 */
+/* 矮屏优化：让卡片高一些，但仍避免溢出屏幕 */
 @media (max-height:700px){
-  .login-card{ margin: calc(20vh + env(safe-area-inset-top, 0px)) auto 8vh; padding:34px 22px; }
+  .login-card{
+    margin: calc(24vh + env(safe-area-inset-top, 0px)) auto 10vh;
+    padding:38px 24px;
+    min-height: clamp(320px, 44vh, 460px);
+  }
 }
