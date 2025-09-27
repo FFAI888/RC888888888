@@ -1,4 +1,4 @@
-<!-- version: v0.04 -->
+<!-- version: v0.05 -->
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -6,19 +6,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>登录</title>
 
-  <!-- 主题色（H214 S97 B100 → #0873FF / #0762D9），沿用上一版 -->
+  <!-- 主题色（H214 S97 B100 → #0873FF / #0762D9）+ 按钮新配色变量 -->
   <style>
     :root{
       --theme-main:#0873FF;
       --theme-secondary:#0762D9;
       --theme-shadow: rgba(8,115,255,.35);
+      /* 新按钮主色：更亮、更显眼 */
+      --btn-main:#2EC5FF;
+      --btn-secondary:#1AA3FF;
     }
   </style>
 
-  <link rel="stylesheet" href="style.css?v=0.04" />
+  <link rel="stylesheet" href="style.css?v=0.05" />
 </head>
 <body>
-  <div id="verBadge" class="ver-badge">v0.04</div>
+  <div id="verBadge" class="ver-badge">v0.05</div>
 
   <main class="container">
     <div class="login-card">
@@ -32,6 +35,6 @@
   <!-- 顶部弹窗容器 -->
   <div id="toast" class="toast" aria-live="polite"></div>
 
-  <script src="app.js?v=0.04"></script>
+  <script src="app.js?v=0.05"></script>
 </body>
 </html>
