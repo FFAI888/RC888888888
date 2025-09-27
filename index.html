@@ -1,10 +1,13 @@
-<!-- version: v0.10 -->
+<!-- version: v0.11 -->
 <!DOCTYPE html>
 <html lang="zh">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>登录</title>
+
+  <!-- 预加载你的图标，提升首屏显示速度 -->
+  <link rel="preload" as="image" href="tupian/bg.jpg" />
 
   <!-- 主题/按钮变量（沿用） -->
   <style>
@@ -17,18 +20,18 @@
     }
   </style>
 
-  <link rel="stylesheet" href="style.css?v=0.10" />
+  <link rel="stylesheet" href="style.css?v=0.11" />
 </head>
 <body>
-  <div id="verBadge" class="ver-badge">v0.10</div>
+  <div id="verBadge" class="ver-badge">v0.11</div>
 
   <main class="container">
     <div class="login-card">
-      <!-- App 图标（新增） -->
-      <img id="appLogo" class="app-logo" src="tupian/app-logo.png" alt="RongChain" width="88" height="88" loading="eager" decoding="async" />
+      <!-- App 图标：使用你的图片 tupian/bg.jpg，并设为 80×80 -->
+      <img id="appLogo" class="app-logo" src="tupian/bg.jpg" alt="RongChain" width="80" height="80" loading="eager" decoding="async" />
 
       <h2>连接钱包登录</h2>
-      <!-- 欢迎语（新增） -->
+      <!-- 欢迎语 -->
       <p class="welcome">欢迎使用 RongChain</p>
 
       <p class="sub">仅支持 BSC 主网（56）</p>
@@ -64,6 +67,6 @@
   <!-- 顶部弹窗容器 -->
   <div id="toast" class="toast" aria-live="polite"></div>
 
-  <script src="app.js?v=0.10"></script>
+  <script src="app.js?v=0.11"></script>
 </body>
 </html>
