@@ -1,8 +1,7 @@
-/* version: v0.07 — 在不删除任何旧样式的基础上，让登录卡片本体“更高” */
+/* version: v0.08 — 增加按钮呼吸、扫光、加载、错误摇动；其它样式保持不变 */
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{
   height:100%;
-  /* 多层径向光晕 + 原主题线性渐变（保留 v0.06 背景，不删） */
   background:
     radial-gradient(1200px 800px at 20% -10%, rgba(255,255,255,.08), transparent 55%),
     radial-gradient(900px 600px at 120% 20%, rgba(14,142,255,.12), transparent 60%),
@@ -19,42 +18,37 @@ button{-webkit-tap-highlight-color:transparent;cursor:pointer}
   padding:4px 8px;border-radius:6px;font-size:12px;z-index:10
 }
 
-/* 登录卡片：保持 v0.06 的留白与视觉，新增“卡片更高”能力 */
+/* 登录卡片（保持 v0.07，不删） */
 .login-card{
   max-width:440px;
-  margin: calc(32vh + env(safe-area-inset-top, 0px)) auto 12vh; /* 原值保留 */
+  margin: calc(32vh + env(safe-area-inset-top, 0px)) auto 12vh;
   background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
   padding: 46px 28px;
   border-radius: 22px;
   text-align:center;
-  border:1px solid rgba(255,255,白色,.22); /* 注意：保持原样式语义，如你的构建器对“白色”有问题请替换为 255,255,255 */
+  border:1px solid rgba(255,255,255,.22); /* 修正上一版中的中文“白色”占位为有效值 */
   box-shadow: 0 18px 42px var(--theme-shadow, rgba(8,115,255,.35)), 0 2px 12px rgba(0,0,0,.16);
   backdrop-filter: blur(10px);
-
-  /* ① 新增：卡片本体增高 —— 自适应的最小高度（小屏不过度溢出） */
   min-height: clamp(380px, 56vh, 600px);
-
-  /* ② 新增：让卡片内的内容在更高的卡片里垂直居中，看起来更匀称 */
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
+  display:flex;flex-direction:column;justify-content:center;
 }
 .login-card h2{font-size:22px;margin-bottom:14px;letter-spacing:.2px}
 .sub{font-size:13px;opacity:.92;margin-bottom:22px}
 .status{font-size:13px;opacity:.96;margin-top:16px}
 
-/* 按钮（保留 v0.06 的更亮渐变与更大尺寸） */
+/* 基础按钮（保留 v0.07 的尺寸与视觉） */
 .btn-primary,.btn-danger{
   border:none;border-radius:14px;padding:16px 18px;font-size:16px;font-weight:800;color:#fff;
-  transition: transform .06s ease, filter .12s ease, box-shadow .12s ease
+  transition: transform .1s ease, filter .12s ease, box-shadow .12s ease
 }
 .btn-primary{
+  position:relative; overflow:hidden;
   background:linear-gradient(180deg, var(--btn-main, var(--theme-main,#0873FF)), var(--btn-secondary, var(--theme-secondary,#0762D9)));
   box-shadow:0 12px 22px var(--theme-shadow, rgba(8,115,255,.35));
   width:100%; min-height:52px;
 }
 .btn-primary:hover{filter:brightness(1.07)}
-.btn-primary:active{transform:scale(.983)}
+.btn-primary:active{transform:scale(.985)}
 
 .btn-danger{
   background:linear-gradient(180deg,#ff6a6a,#f44336);
@@ -64,19 +58,68 @@ button{-webkit-tap-highlight-color:transparent;cursor:pointer}
 .btn-danger:hover{filter:brightness(1.05)}
 .btn-danger:active{transform:scale(.985)}
 
+/* ——— 新增：A. 呼吸脉冲（待机） ——— */
+@keyframes pulsebtn { 0%,100%{transform:scale(1)} 50%{transform:scale(1.01)} }
+.btn-primary.pulse{ animation: pulsebtn 3.2s ease-in-out infinite }
+
+/* ——— 新增：B. 扫光高光（shimmer） ——— */
+@keyframes shimmer {
+  0%  { transform: translateX(-130%) skewX(-15deg); opacity:.0 }
+  15% { opacity:.35 }
+  50% { opacity:.45 }
+  100%{ transform: translateX(130%) skewX(-15deg); opacity:.0 }
+}
+.btn-primary.shimmer-on::before{
+  content:""; position:absolute; top:-30%; bottom:-30%; width:60%;
+  left:-60%; transform: translateX(-130%) skewX(-15deg);
+  background: linear-gradient(120deg, rgba(255,255,255,.00) 0%, rgba(255,255,255,.45) 50%, rgba(255,255,255,.00) 100%);
+  filter: blur(2px);
+  animation: shimmer 3.6s ease-in-out infinite;
+  pointer-events:none;
+}
+
+/* ——— 新增：C. 加载状态（右侧旋转） ——— */
+@keyframes spin { to { transform: rotate(360deg); } }
+.btn-primary.is-loading{ filter:brightness(.98); }
+.btn-primary.is-loading::after{
+  content:""; position:absolute; right:14px; top:50%; width:18px; height:18px;
+  margin-top:-9px; border-radius:50%;
+  border:2px solid rgba(255,255,255,.75); border-top-color: transparent;
+  animation: spin .8s linear infinite;
+}
+
+/* ——— 新增：D. 成功状态（绿色） ——— */
+.btn-primary.is-success{
+  background:linear-gradient(180deg,#3bd671,#12b160);
+  box-shadow:0 12px 22px rgba(18,177,96,.35);
+}
+
+/* ——— 新增：E. 禁用/不可点击（与加载共用） ——— */
+.btn-primary[disabled]{ opacity:.8; cursor:not-allowed; filter:saturate(.9) }
+
+/* ——— 新增：F. 错误摇动 ——— */
+@keyframes btnshake {
+  0%,100% { transform: translateX(0) }
+  20% { transform: translateX(-4px) }
+  40% { transform: translateX(4px) }
+  60% { transform: translateX(-3px) }
+  80% { transform: translateX(3px) }
+}
+.btn-primary.shake{ animation: btnshake .32s ease }
+
+/* 顶部栏与面板（不变） */
 .topbar{
   display:flex;justify-content:space-between;align-items:center;
   padding:12px 16px;background:rgba(0,0,0,.35);backdrop-filter:blur(6px)
 }
 .title{font-weight:700;font-size:18px}
-
 .panel{
   margin-top:14px;padding:14px;background:rgba(255,255,255,.08);
   border:1px solid rgba(255,255,255,.15);border-radius:12px
 }
 .panel h3{font-size:16px;margin-bottom:6px}
 
-/* 顶部弹窗（沿用 v0.06 动效，不删） */
+/* 顶部弹窗（不变） */
 .toast{
   position:fixed;left:50%;
   top:14px;z-index:9999;min-width:70%;max-width:92%;
@@ -88,19 +131,12 @@ button{-webkit-tap-highlight-color:transparent;cursor:pointer}
   transform: translateX(-50%) translateY(-10px) scale(.98);
   transition: opacity .22s ease, transform .22s ease;
 }
-.toast.show{
-  opacity:1;pointer-events:auto;
-  transform: translateX(-50%) translateY(0) scale(1);
-}
+.toast.show{ opacity:1;pointer-events:auto; transform: translateX(-50%) translateY(0) scale(1) }
 .toast.warn{background:linear-gradient(135deg,rgba(255,157,5,.95),rgba(241,117,2,.95))}
 .toast.success{background:linear-gradient(135deg,rgba(28,185,98,.95),rgba(17,146,76,.95))}
 .toast.error{background:linear-gradient(135deg,rgba(230,57,70,.95),rgba(200,42,55,.95))}
 
-/* 矮屏优化：让卡片高一些，但仍避免溢出屏幕 */
+/* 矮屏优化（不变） */
 @media (max-height:700px){
-  .login-card{
-    margin: calc(24vh + env(safe-area-inset-top, 0px)) auto 10vh;
-    padding:38px 24px;
-    min-height: clamp(320px, 44vh, 460px);
-  }
+  .login-card{ margin: calc(24vh + env(safe-area-inset-top, 0px)) auto 10vh; padding:38px 24px; min-height: clamp(320px, 44vh, 460px); }
 }
