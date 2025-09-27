@@ -1,4 +1,4 @@
-<!-- version: v0.08 -->
+<!-- version: v0.09 -->
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>登录</title>
 
-  <!-- 主题色 + 按钮配色（沿用） -->
+  <!-- 主题/按钮变量（沿用） -->
   <style>
     :root{
       --theme-main:#0873FF;
@@ -17,23 +17,43 @@
     }
   </style>
 
-  <link rel="stylesheet" href="style.css?v=0.08" />
+  <link rel="stylesheet" href="style.css?v=0.09" />
 </head>
 <body>
-  <div id="verBadge" class="ver-badge">v0.08</div>
+  <div id="verBadge" class="ver-badge">v0.09</div>
 
   <main class="container">
     <div class="login-card">
       <h2>连接钱包登录</h2>
       <p class="sub">仅支持 BSC 主网（56）</p>
+
+      <!-- 微气泡提示（20） -->
+      <div id="tip" class="tip" role="status" aria-live="polite"></div>
+
+      <!-- 按钮（8/10/33/D1/D5 等动效由 CSS+JS 管理） -->
       <button id="connectBtn" class="btn-primary">🔗 连接钱包</button>
+
       <p id="status" class="status">状态：未连接</p>
+
+      <!-- 分步提示条（19） -->
+      <div id="steps" class="steps" hidden>
+        <div class="steps-bar"><span class="steps-bar-fill" style="width:0%"></span></div>
+        <ul class="steps-list">
+          <li class="step" data-step="1">请求账户</li>
+          <li class="step" data-step="2">检查网络</li>
+          <li class="step" data-step="3">授权中</li>
+          <li class="step" data-step="4">完成</li>
+        </ul>
+      </div>
+
+      <!-- 二次确认提示（27）：首次点击进入确认态，再次点击执行 -->
+      <p id="confirmLine" class="confirm-line" hidden>再次点击确认连接<span id="addrPreview" class="addr-preview" hidden>：0x…</span> <a id="changeHint" href="javascript:;" class="change-hint" hidden>（更换）</a></p>
     </div>
   </main>
 
-  <!-- 顶部弹窗容器 -->
+  <!-- 顶部弹窗容器（沿用） -->
   <div id="toast" class="toast" aria-live="polite"></div>
 
-  <script src="app.js?v=0.08"></script>
+  <script src="app.js?v=0.09"></script>
 </body>
 </html>
