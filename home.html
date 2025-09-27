@@ -1,0 +1,39 @@
+<!-- version: v0.02 -->
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>首页</title>
+
+  <!-- 主题色：H214 S97 B100 => 主色 #0873FF / 副色 #0762D9 -->
+  <style>
+    :root{
+      --theme-main: #0873FF;
+      --theme-secondary: #0762D9;
+    }
+  </style>
+
+  <link rel="stylesheet" href="style.css?v=0.02" />
+</head>
+<body>
+  <div id="verBadge" class="ver-badge">v0.02</div>
+
+  <header class="topbar">
+    <span class="title">首页</span>
+    <button id="logoutBtn" class="btn-danger">退出</button>
+  </header>
+
+  <main class="container">
+    <section class="panel">
+      <h3>钱包信息</h3>
+      <p id="addrLine">地址：检测中…</p>
+    </section>
+  </main>
+
+  <!-- 顶部弹窗容器 -->
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <script src="app.js?v=0.02"></script>
+</body>
+</html>
