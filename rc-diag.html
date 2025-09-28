@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>RongChain 一键自检 v1.00</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>
+:root{--bg:#0f172a;--fg:#e5e7eb;--muted:#94a3b8;--card:#111827;--border:#1f2937;--ok:#10b981;--warn:#f59e0b;--err:#ef4444;--acc:#22d3ee}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue","PingFang SC",Arial,sans-serif}
+.wrap{max-width:960px;margin:18px auto;padding:0 14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:14px}
+h1{font-size:18px;margin:0 0 8px 0;color:var(--acc)}
+label{color:var(--muted);font-size:14px}
+input{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:#0b1222;color:var(--fg);outline:none}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.btn{padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:#0b1222;color:var(--fg);cursor:pointer}
+.btn:active{filter:brightness(1.1)}
+.btn-primary{background:var(--ok);color:#06281f;border:none}
+.kv{display:grid;grid-template-columns: 220px 1fr;gap:6px}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;margin-left:6px}
+.ok{background:#052d1f;color:#34d399}.warn{background:#3a2a04;color:#facc15}.err{background:#3b0d0d;color:#fca5a5}
+pre{white-space:pre-wrap;word-break:break-word;background:#0b1222;border:1px solid var(--border);padding:10px;border-radius:10px;max-height:320px;overflow:auto}
+small{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>RongChain 一键自检 <small>v1.00</small></h1>
+    <div class="kv">
+      <label>当前页面 Origin（只读）</label>
+      <input id="pageOrigin" readonly>
+      <label>Worker API 根地址（必填）</label>
+      <input id="apiBase" placeholder="例如：https://rc-admin-api.453870150.workers.dev">
+    </div>
+    <div class="row">
+      <button id="btnLogin" class="btn">在新标签页打开 /config 登录 Access</button>
+      <button id="btnRun" class="btn btn-primary">开始诊断</button>
+    </div>
+    <small>提示：若你用“完全后台认证(v0.07B)”，前台读 /config 会 <b>403</b> 属正常；此页会明确标注。</small>
+  </div>
+
+  <div class="card">
+    <h1>结果</h1>
+    <div id="r1">① Worker 存活：<span class="badge warn">未测试</span></div>
+    <div id="r2">② GET /config（无凭据）：<span class="badge warn">未测试</span></div>
+    <div id="r3">③ GET /config（带凭据）：<span class="badge warn">未测试</span></div>
+    <div id="r4">④ CORS（当前页是否被允许）：<span class="badge warn">未测试</span></div>
+    <div id="r5">⑤ Content-Type/UTF-8：<span class="badge warn">未测试</span></div>
+    <div id="r6">⑥ JSON 合法/中文显示：<span class="badge warn">未测试</span></div>
+  </div>
+
+  <div class="card">
+    <h1>详细响应</h1>
+    <h3>无凭据响应（②）</h3>
+    <pre id="log2"></pre>
+    <h3>带凭据响应（③）</h3>
+    <pre id="log3"></pre>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const pageOrigin = $('#pageOrigin');
+const apiBase = $('#apiBase');
+const btnRun = $('#btnRun');
+const btnLogin = $('#btnLogin');
+const r1=$('#r1'), r2=$('#r2'), r3=$('#r3'), r4=$('#r4'), r5=$('#r5'), r6=$('#r6');
+const log2=$('#log2'), log3=$('#log3');
+
+pageOrigin.value = location.origin;
+
+function setBadge(el, ok, msg){
+  const span = el.querySelector('.badge');
+  span.textContent = msg || (ok?'通过':'失败');
+  span.className = 'badge ' + (ok ? 'ok' : 'err');
+}
+function setBadgeWarn(el, msg){
+  const span = el.querySelector('.badge');
+  span.textContent = msg || '注意';
+  span.className = 'badge warn';
+}
+function cut(s){ return (s||'').slice(0,280); }
+
+btnLogin.onclick = () => {
+  const base = (apiBase.value||'').trim();
+  if(!base){ alert('请先填写 Worker API 根地址'); return; }
+  window.open(base.replace(/\/$/,'') + '/config', '_blank');
+};
+
+btnRun.onclick = async () => {
+  const base = (apiBase.value||'').trim().replace(/\/$/,'');
+  if(!base){ alert('请先填写 Worker API 根地址'); return; }
+
+  // ① 存活
+  try{
+    const r = await fetch(base + '/', { credentials:'include' });
+    const txt = await r.text();
+    setBadge(r1, r.ok && txt.trim()==='OK', `${r.status} ${txt.trim()}`);
+  }catch(e){
+    setBadge(r1, false, '请求失败');
+  }
+
+  // ② 无凭据 GET
+  log2.textContent='';
+  let h2 = {}, t2 = '', s2 = 0;
+  try{
+    const r = await fetch(base + '/config?t=' + Date.now());
+    s2 = r.status;
+    h2.acao = r.headers.get('access-control-allow-origin');
+    h2.acac = r.headers.get('access-control-allow-credentials');
+    h2.ct   = r.headers.get('content-type');
+    t2 = await r.text();
+    log2.textContent = `状态: ${s2}\nACAO: ${h2.acao}\nACAC: ${h2.acac}\nCT: ${h2.ct}\n---\n` + cut(t2);
+    // 通过条件：v0.06B 应 200；v0.07B 403 属正常
+    const isOk = (s2===200) || (s2===403);
+    setBadge(r2, isOk, `${s2}`);
+  }catch(e){
+    setBadge(r2, false, '请求失败');
+    log2.textContent = String(e);
+  }
+
+  // ③ 带凭据 GET
+  log3.textContent='';
+  let h3 = {}, t3 = '', s3 = 0;
+  try{
+    const r = await fetch(base + '/config?t=' + Date.now(), { credentials:'include' });
+    s3 = r.status;
+    h3.acao = r.headers.get('access-control-allow-origin');
+    h3.acac = r.headers.get('access-control-allow-credentials');
+    h3.ct   = r.headers.get('content-type');
+    t3 = await r.text();
+    log3.textContent = `状态: ${s3}\nACAO: ${h3.acao}\nACAC: ${h3.acac}\nCT: ${h3.ct}\n---\n` + cut(t3);
+    // 带凭据场景：登录 Access 后应 200；未登录 403
+    setBadge(r3, s3===200 || s3===403, `${s3}`);
+  }catch(e){
+    setBadge(r3, false, '请求失败');
+    log3.textContent = String(e);
+  }
+
+  // ④ CORS（以无凭据结果为准，检查是否允许当前页面 Origin）
+  const expect = location.origin;
+  const acao = (h2.acao||'').trim();
+  if (!acao){ setBadge(r4, false, '无 access-control-allow-origin 头'); }
+  else if (acao===expect){ setBadge(r4, true, '已允许 ' + acao); }
+  else { setBadge(r4, false, '返回 '+acao+' ≠ 当前 '+expect); }
+
+  // ⑤ 内容类型/UTF-8
+  const ct = (h2.ct || h3.ct || '').toLowerCase();
+  if (ct.includes('charset=utf-8')) setBadge(r5, true, ct);
+  else setBadge(r5, false, ct || '无 content-type');
+
+  // ⑥ JSON 合法/中文显示
+  try{
+    let parsed = null;
+    let raw = t2 || t3 || '';
+    try{ parsed = JSON.parse(raw); }catch(_){}
+    // v0.07B 结构：{ok:true, data:{...}}
+    const data = (parsed && parsed.data) ? parsed.data : parsed;
+    const notice = data && data.notice;
+    const hasChinese = /[\u4e00-\u9fa5]/.test(raw);
+    const looksEscaped = /\\u[0-9a-fA-F]{4}/.test(raw);
+
+    if (!data || typeof data!=='object'){
+      setBadge(r6, false, '不是合法 JSON 对象');
+    } else if (notice && typeof notice==='string' && hasChinese){
+      setBadge(r6, true, '中文正常');
+    } else if (looksEscaped && !ct.includes('charset=utf-8')){
+      setBadge(r6, false, '可能二次转义 + 缺少 UTF-8');
+    } else if (looksEscaped){
+      setBadgeWarn(r6, '内容是 \\uXXXX 形式（可换成直接中文）');
+    } else {
+      setBadgeWarn(r6, '未检测到中文样例，检查 notice 字段');
+    }
+  }catch(e){
+    setBadge(r6, false, '解析失败');
+  }
+};
+</script>
+</body>
+</html>
