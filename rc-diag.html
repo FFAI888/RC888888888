@@ -2,60 +2,182 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<title>RongChain 一键自检 v1.00</title>
+<title>RongChain 一键自检 & 快捷修复 v1.01</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>
-:root{--bg:#0f172a;--fg:#e5e7eb;--muted:#94a3b8;--card:#111827;--border:#1f2937;--ok:#10b981;--warn:#f59e0b;--err:#ef4444;--acc:#22d3ee}
-*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue","PingFang SC",Arial,sans-serif}
-.wrap{max-width:960px;margin:18px auto;padding:0 14px}
+:root{
+  --bg:#0f172a;--fg:#e5e7eb;--muted:#94a3b8;--card:#111827;--border:#1f2937;
+  --ok:#10b981;--warn:#f59e0b;--err:#ef4444;--acc:#22d3ee;--btn:#0b1222
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);
+  font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue","PingFang SC","Noto Sans CJK SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif}
+.wrap{max-width:1000px;margin:18px auto;padding:0 14px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:14px}
 h1{font-size:18px;margin:0 0 8px 0;color:var(--acc)}
+h2{font-size:16px;margin:8px 0;color:var(--fg)}
 label{color:var(--muted);font-size:14px}
-input{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:#0b1222;color:var(--fg);outline:none}
+input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--btn);color:var(--fg);outline:none}
+textarea{min-height:120px}
 .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-.btn{padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:#0b1222;color:var(--fg);cursor:pointer}
+.btn{padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:var(--btn);color:var(--fg);cursor:pointer}
 .btn:active{filter:brightness(1.1)}
 .btn-primary{background:var(--ok);color:#06281f;border:none}
-.kv{display:grid;grid-template-columns: 220px 1fr;gap:6px}
+.btn-warn{background:#2d2105;color:#ffcf5b;border:1px solid #3b2c07}
+.btn-err{background:#3b0d0d;color:#fca5a5;border:1px solid #4a1212}
+.kv{display:grid;grid-template-columns: 220px 1fr;gap:8px}
 .badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;margin-left:6px}
 .ok{background:#052d1f;color:#34d399}.warn{background:#3a2a04;color:#facc15}.err{background:#3b0d0d;color:#fca5a5}
-pre{white-space:pre-wrap;word-break:break-word;background:#0b1222;border:1px solid var(--border);padding:10px;border-radius:10px;max-height:320px;overflow:auto}
+pre{white-space:pre-wrap;word-break:break-word;background:#0b1222;border:1px solid var(--border);padding:10px;border-radius:10px;max-height:360px;overflow:auto}
 small{color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:760px){.kv{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}}
+details>summary{cursor:pointer;color:var(--muted)}
+.codebox{position:relative}
+.copy{position:absolute;right:6px;top:6px}
+.hr{height:1px;background:var(--border);margin:10px 0}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="card">
-    <h1>RongChain 一键自检 <small>v1.00</small></h1>
+    <h1>RongChain 一键自检 & 快捷修复 <small>v1.01</small></h1>
     <div class="kv">
-      <label>当前页面 Origin（只读）</label>
+      <label>当前页面 Origin（自动）</label>
       <input id="pageOrigin" readonly>
       <label>Worker API 根地址（必填）</label>
       <input id="apiBase" placeholder="例如：https://rc-admin-api.453870150.workers.dev">
+      <label>你的后台站点 Origin（建议填写，用于 CORS 片段生成）</label>
+      <input id="adminOrigin" placeholder="例如：https://rongchain-houtai.pages.dev">
     </div>
     <div class="row">
-      <button id="btnLogin" class="btn">在新标签页打开 /config 登录 Access</button>
-      <button id="btnRun" class="btn btn-primary">开始诊断</button>
+      <button id="btnLogin" class="btn">在新标签页打开 /config（用于 Access 登录）</button>
+      <button id="btnRun" class="btn btn-primary">开始诊断（基础）</button>
+      <button id="btnDeep" class="btn btn-warn">深度诊断（含多次重试）</button>
     </div>
-    <small>提示：若你用“完全后台认证(v0.07B)”，前台读 /config 会 <b>403</b> 属正常；此页会明确标注。</small>
+    <small>提示：若使用“完全后台认证（v0.07B）”，前台读 <code>/config</code> 返回 <b>403</b> 属于正常。</small>
   </div>
 
   <div class="card">
-    <h1>结果</h1>
+    <h2>诊断结果</h2>
     <div id="r1">① Worker 存活：<span class="badge warn">未测试</span></div>
-    <div id="r2">② GET /config（无凭据）：<span class="badge warn">未测试</span></div>
-    <div id="r3">③ GET /config（带凭据）：<span class="badge warn">未测试</span></div>
-    <div id="r4">④ CORS（当前页是否被允许）：<span class="badge warn">未测试</span></div>
-    <div id="r5">⑤ Content-Type/UTF-8：<span class="badge warn">未测试</span></div>
-    <div id="r6">⑥ JSON 合法/中文显示：<span class="badge warn">未测试</span></div>
+    <div id="r2">② 策略版本识别（v0.06B / v0.07B）：<span class="badge warn">未测试</span></div>
+    <div id="r3">③ GET /config（无凭据）：<span class="badge warn">未测试</span></div>
+    <div id="r4">④ GET /config（带凭据）：<span class="badge warn">未测试</span></div>
+    <div id="r5">⑤ CORS（当前前台是否被允许）：<span class="badge warn">未测试</span></div>
+    <div id="r6">⑥ Content-Type/UTF-8：<span class="badge warn">未测试</span></div>
+    <div id="r7">⑦ KV/JSON 合法 & 中文显示/是否二次转义：<span class="badge warn">未测试</span></div>
   </div>
 
   <div class="card">
-    <h1>详细响应</h1>
-    <h3>无凭据响应（②）</h3>
-    <pre id="log2"></pre>
-    <h3>带凭据响应（③）</h3>
-    <pre id="log3"></pre>
+    <h2>详细响应（用于排查）</h2>
+    <div class="grid2">
+      <div>
+        <h3>无凭据（③）</h3>
+        <pre id="log2"></pre>
+      </div>
+      <div>
+        <h3>带凭据（④）</h3>
+        <pre id="log3"></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>快捷修复 · 一键复制</h2>
+
+    <details open>
+      <summary><b>A. 生成 CORS 允许片段（ALLOWED_ORIGINS）</b></summary>
+      <div class="hr"></div>
+      <p>根据上方“当前页面 Origin”和“后台 Origin”，一键生成：</p>
+      <div class="codebox">
+        <button class="btn copy" data-copy="origins">复制</button>
+        <pre id="originsBox">点击“生成”后出现...</pre>
+      </div>
+      <div class="row">
+        <button id="btnGenOrigins" class="btn btn-primary">生成片段</button>
+      </div>
+      <small>把生成的数组粘到你的 Worker 代码里的 <code>ALLOWED_ORIGINS</code>（完整文件在下面 B/C）。</small>
+    </details>
+
+    <details>
+      <summary><b>B. 最小补丁 · Worker（v0.06B，公开 GET，后台 POST）</b></summary>
+      <div class="hr"></div>
+      <p>已内置 <code>charset=utf-8</code> 与 CORS、Access 邮箱位。修改括号内的域名与邮箱后，整体覆盖你的 Worker 代码。</p>
+      <div class="codebox">
+        <button class="btn copy" data-copy="w06">复制</button>
+        <textarea id="w06" spellcheck="false"></textarea>
+      </div>
+    </details>
+
+    <details>
+      <summary><b>C. 最小补丁 · Worker（v0.07B，完全后台认证）</b></summary>
+      <div class="hr"></div>
+      <p>GET/POST 都需 Access；前台读不到 /config。已内置 <code>charset=utf-8</code> 与 CORS、Access 邮箱位。</p>
+      <div class="codebox">
+        <button class="btn copy" data-copy="w07">复制</button>
+        <textarea id="w07" spellcheck="false"></textarea>
+      </div>
+    </details>
+
+    <details>
+      <summary><b>D. KV 示例 JSON（中文直写）</b></summary>
+      <div class="hr"></div>
+      <div class="codebox">
+        <button class="btn copy" data-copy="kvZh">复制</button>
+        <textarea id="kvZh" spellcheck="false">{
+  "notice": "欢迎使用 RongChain",
+  "price": 0.1234,
+  "chainId": 56,
+  "whitelistContract": "0x8b32872842C76DA95aeB25d27dE2F16fa1979bE5",
+  "updatedAt": 1759000000000,
+  "products": {
+    "apple": {
+      "visible": true,
+      "title": "Apple iPhone 15",
+      "image": "tupian/iphone.jpg",
+      "price": 5999,
+      "currency": "CNY"
+    }
+  }
+}</textarea>
+      </div>
+    </details>
+
+    <details>
+      <summary><b>E. KV 示例 JSON（Unicode 版）</b></summary>
+      <div class="hr"></div>
+      <div class="codebox">
+        <button class="btn copy" data-copy="kvUni">复制</button>
+        <textarea id="kvUni" spellcheck="false">{
+  "notice": "\u6b22\u8fce\u4f7f\u7528 RongChain",
+  "price": 0.1234,
+  "chainId": 56,
+  "whitelistContract": "0x8b32872842C76DA95aeB25d27dE2F16fa1979bE5",
+  "updatedAt": 1759000000000,
+  "products": {
+    "apple": {
+      "visible": true,
+      "title": "Apple iPhone 15",
+      "image": "tupian/iphone.jpg",
+      "price": 5999,
+      "currency": "CNY"
+    }
+  }
+}</textarea>
+      </div>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2>使用说明（小白）</h2>
+    <ol>
+      <li>在上方填写你的 <b>Worker API 根地址</b>（形如 <code>https://rc-admin-api.453870150.workers.dev</code>）。</li>
+      <li>如你使用“完全后台认证(v0.07B)”，先点“在新标签页打开 /config”，按邮箱完成登录。</li>
+      <li>点击“开始诊断”。所有结果会在“诊断结果”里显示 ✅/⚠️/❌。</li>
+      <li>若 CORS/UTF-8/Access 有问题：下滑到“快捷修复”，点击“生成片段/复制完整 Worker”，按提示替换后重新部署。</li>
+      <li>若提示 KV/JSON 错误：把 D/E 的示例 JSON 复制到 KV 的 <code>config</code> 键中，保存即可。</li>
+    </ol>
   </div>
 </div>
 
@@ -63,119 +185,274 @@ small{color:var(--muted)}
 const $ = s => document.querySelector(s);
 const pageOrigin = $('#pageOrigin');
 const apiBase = $('#apiBase');
+const adminOrigin = $('#adminOrigin');
 const btnRun = $('#btnRun');
+const btnDeep = $('#btnDeep');
 const btnLogin = $('#btnLogin');
-const r1=$('#r1'), r2=$('#r2'), r3=$('#r3'), r4=$('#r4'), r5=$('#r5'), r6=$('#r6');
+
+const r1=$('#r1'), r2=$('#r2'), r3=$('#r3'), r4=$('#r4'), r5=$('#r5'), r6=$('#r6'), r7=$('#r7');
 const log2=$('#log2'), log3=$('#log3');
 
 pageOrigin.value = location.origin;
 
-function setBadge(el, ok, msg){
+// —— UI helpers ——
+function setBadge(el, level, msg){
   const span = el.querySelector('.badge');
-  span.textContent = msg || (ok?'通过':'失败');
-  span.className = 'badge ' + (ok ? 'ok' : 'err');
+  span.textContent = msg || (level==='ok'?'通过': level==='warn'?'注意':'失败');
+  span.className = 'badge ' + (level||'warn');
 }
-function setBadgeWarn(el, msg){
-  const span = el.querySelector('.badge');
-  span.textContent = msg || '注意';
-  span.className = 'badge warn';
-}
-function cut(s){ return (s||'').slice(0,280); }
+function cut(s){ return (s||'').slice(0,600); }
+function now(){ return Date.now(); }
 
-btnLogin.onclick = () => {
+// —— Quick copy buttons ——
+document.querySelectorAll('.copy').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const id = btn.getAttribute('data-copy');
+    const el = document.getElementById(id);
+    const txt = (el.value ?? el.textContent ?? '').toString();
+    navigator.clipboard.writeText(txt).then(()=>{btn.textContent='已复制'; setTimeout(()=>btn.textContent='复制',1200);});
+  });
+});
+
+// —— Generate ALLOWED_ORIGINS snippet ——
+$('#btnGenOrigins').addEventListener('click', ()=>{
+  const fo = '  \'' + (pageOrigin.value||'').trim() + '\'';
+  const ao = (adminOrigin.value||'').trim() ? (',\n  \''+ adminOrigin.value.trim() + '\'') : '';
+  const s = `const ALLOWED_ORIGINS = [\n${fo}${ao}\n];`;
+  $('#originsBox').textContent = s;
+});
+
+// —— Worker templates (v0.06B / v0.07B) ——
+// 用占位符 {{FRONT_ORIGIN}} / {{ADMIN_ORIGIN}} / {{ADMIN_EMAIL}} 替换
+const tpl06 = `// —— rc-admin-api v0.06B+fix ——（公开 GET，后台 POST；含 charset=utf-8 & CORS） 
+const ALLOWED_ORIGINS = [
+  '{{FRONT_ORIGIN}}',            // 前台 Origin（如 https://ffai888.github.io）
+  '{{ADMIN_ORIGIN}}'             // 后台 Origin（如 https://rongchain-houtai.pages.dev）
+];
+const ADMIN_EMAIL = '{{ADMIN_EMAIL}}'; // 允许写入的管理员邮箱
+
+function pickOrigin(req){ const o=req.headers.get('Origin'); return o && ALLOWED_ORIGINS.includes(o) ? o : null; }
+function corsHeaders(origin){
+  const base = origin ? { 'Access-Control-Allow-Origin': origin } : {};
+  return {
+    ...base,
+    'Access-Control-Allow-Credentials':'true',
+    'Access-Control-Allow-Headers':'Content-Type, Authorization',
+    'Access-Control-Allow-Methods':'GET, POST, OPTIONS'
+  };
+}
+function jsonCORS(body,status=200,origin=null,extra={}){
+  return new Response(body, { status, headers:{ ...corsHeaders(origin), 'Content-Type':'application/json; charset=utf-8', ...extra } });
+}
+function textCORS(body,status=200,origin=null,extra={}){
+  return new Response(body, { status, headers:{ ...corsHeaders(origin), 'Content-Type':'text/plain; charset=utf-8', ...extra } });
+}
+
+export default {
+  async fetch(req, env){
+    const url = new URL(req.url);
+    const origin = pickOrigin(req);
+    if (req.method==='OPTIONS') return jsonCORS(null,204,origin);
+
+    if (req.method==='GET' && url.pathname==='/config') {
+      try{
+        if (!env.RC_KV) return jsonCORS(JSON.stringify({ok:false,error:'KV 未绑定'}),500,origin);
+        const json = await env.RC_KV.get('config',{type:'json'}) || {};
+        return jsonCORS(JSON.stringify(json),200,origin,{'Cache-Control':'public, max-age=15'});
+      }catch(e){
+        return jsonCORS(JSON.stringify({ok:false,error:String(e)}),500,origin);
+      }
+    }
+
+    if (req.method==='POST' && url.pathname==='/config') {
+      const email = req.headers.get('Cf-Access-Authenticated-User-Email');
+      if (!email || email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+        return jsonCORS(JSON.stringify({ok:false,error:'Forbidden'}),403,origin);
+      }
+      if (!env.RC_KV) return jsonCORS(JSON.stringify({ok:false,error:'KV 未绑定'}),500,origin);
+      try{
+        const body = await req.json();
+        await env.RC_KV.put('config', JSON.stringify(body));
+        return jsonCORS(JSON.stringify({ok:true,by:email}),200,origin);
+      }catch(e){
+        return jsonCORS(JSON.stringify({ok:false,error:String(e)}),500,origin);
+      }
+    }
+
+    return textCORS('OK',200,origin);
+  }
+}`;
+const tpl07 = `// —— rc-admin-api v0.07B+fix ——（GET/POST 都需 Access；含 charset=utf-8 & CORS）
+const ALLOWED_ORIGINS = [
+  '{{FRONT_ORIGIN}}',            // 前台 Origin（如 https://ffai888.github.io）
+  '{{ADMIN_ORIGIN}}'             // 后台 Origin（如 https://rongchain-houtai.pages.dev）
+];
+const ADMIN_EMAILS = ['{{ADMIN_EMAIL}}'];
+
+function pickOrigin(req){ const o=req.headers.get('Origin'); return o && ALLOWED_ORIGINS.includes(o) ? o : null; }
+function corsHeaders(origin){
+  const base = origin ? {'Access-Control-Allow-Origin': origin} : {};
+  return {
+    ...base,
+    'Access-Control-Allow-Credentials':'true',
+    'Access-Control-Allow-Headers':'Content-Type, Authorization',
+    'Access-Control-Allow-Methods':'GET, POST, OPTIONS',
+    'X-Content-Type-Options':'nosniff'
+  };
+}
+function jsonCORS(body,status=200,origin=null,extra={}){ return new Response(body,{status,headers:{...corsHeaders(origin),'Content-Type':'application/json; charset=utf-8',...extra}}); }
+function textCORS(body,status=200,origin=null,extra={}){ return new Response(body,{status,headers:{...corsHeaders(origin),'Content-Type':'text/plain; charset=utf-8',...extra}}); }
+function requireAdmin(req){
+  const email = req.headers.get('Cf-Access-Authenticated-User-Email');
+  if (!email) return { ok:false, reason:'NO_ACCESS' };
+  const ok = ADMIN_EMAILS.some(e => e.toLowerCase() === email.toLowerCase());
+  return ok ? { ok:true, email } : { ok:false, reason:'NOT_IN_ADMIN_LIST' };
+}
+
+export default {
+  async fetch(req, env){
+    const url = new URL(req.url);
+    const origin = pickOrigin(req);
+    if (req.method==='OPTIONS') return jsonCORS(null,204,origin);
+
+    if (url.pathname === '/config' && (req.method==='GET' || req.method==='POST')) {
+      const auth = requireAdmin(req);
+      if (!auth.ok) {
+        const msg = auth.reason==='NO_ACCESS' ? 'Forbidden: Access login required' : 'Forbidden: Not in admin email list';
+        return jsonCORS(JSON.stringify({ ok:false, error:msg }), 403, origin);
+      }
+      if (!env.RC_KV) return jsonCORS(JSON.stringify({ ok:false, error:'KV 未绑定' }), 500, origin);
+
+      if (req.method==='GET') {
+        try{
+          const obj = await env.RC_KV.get('config',{type:'json'}) || {};
+          return jsonCORS(JSON.stringify({ ok:true, by:auth.email, data:obj }), 200, origin, {'Cache-Control':'no-store'});
+        }catch(e){
+          return jsonCORS(JSON.stringify({ ok:false, error:String(e) }), 500, origin);
+        }
+      }
+      if (req.method==='POST') {
+        try{
+          const body = await req.json();
+          await env.RC_KV.put('config', JSON.stringify(body));
+          return jsonCORS(JSON.stringify({ ok:true, by:auth.email }), 200, origin);
+        }catch(e){
+          return jsonCORS(JSON.stringify({ ok:false, error:String(e) }), 500, origin);
+        }
+      }
+    }
+    return textCORS('OK', 200, origin);
+  }
+}`;
+
+// 将模板填入文本域并用默认值占位，方便一键替换
+function fillWorkerTemplates(){
+  const front = pageOrigin.value || 'https://ffai888.github.io';
+  const admin = adminOrigin.value || 'https://your-admin.pages.dev';
+  const email = '453870150@qq.com';
+  $('#w06').value = tpl06
+    .replace('{{FRONT_ORIGIN}}', front)
+    .replace('{{ADMIN_ORIGIN}}', admin)
+    .replace('{{ADMIN_EMAIL}}', email);
+  $('#w07').value = tpl07
+    .replace('{{FRONT_ORIGIN}}', front)
+    .replace('{{ADMIN_ORIGIN}}', admin)
+    .replace('{{ADMIN_EMAIL}}', email);
+}
+fillWorkerTemplates();
+
+// —— Access 登录按钮 ——
+btnLogin.onclick = ()=>{
   const base = (apiBase.value||'').trim();
   if(!base){ alert('请先填写 Worker API 根地址'); return; }
   window.open(base.replace(/\/$/,'') + '/config', '_blank');
 };
 
-btnRun.onclick = async () => {
+// —— 诊断主流程 ——
+async function runDiag(deep=false){
   const base = (apiBase.value||'').trim().replace(/\/$/,'');
   if(!base){ alert('请先填写 Worker API 根地址'); return; }
+  const po = pageOrigin.value.trim();
 
-  // ① 存活
+  // ① Worker 存活
   try{
     const r = await fetch(base + '/', { credentials:'include' });
     const txt = await r.text();
-    setBadge(r1, r.ok && txt.trim()==='OK', `${r.status} ${txt.trim()}`);
-  }catch(e){
-    setBadge(r1, false, '请求失败');
-  }
+    setBadge(r1, (r.ok && txt.trim()==='OK') ? 'ok':'err', `${r.status} ${txt.trim()}`);
+  }catch(e){ setBadge(r1,'err','请求失败'); }
 
-  // ② 无凭据 GET
-  log2.textContent='';
-  let h2 = {}, t2 = '', s2 = 0;
+  // ③/④：准备变量
+  let h2={},t2='',s2=0, h3={},t3='',s3=0;
+
+  // ③ 无凭据 GET
   try{
-    const r = await fetch(base + '/config?t=' + Date.now());
+    const r = await fetch(base + '/config?t=' + now());
     s2 = r.status;
     h2.acao = r.headers.get('access-control-allow-origin');
     h2.acac = r.headers.get('access-control-allow-credentials');
     h2.ct   = r.headers.get('content-type');
     t2 = await r.text();
     log2.textContent = `状态: ${s2}\nACAO: ${h2.acao}\nACAC: ${h2.acac}\nCT: ${h2.ct}\n---\n` + cut(t2);
-    // 通过条件：v0.06B 应 200；v0.07B 403 属正常
-    const isOk = (s2===200) || (s2===403);
-    setBadge(r2, isOk, `${s2}`);
-  }catch(e){
-    setBadge(r2, false, '请求失败');
-    log2.textContent = String(e);
-  }
+    setBadge(r3, (s2===200 || s2===403)?'ok':'err', `${s2}`);
+  }catch(e){ setBadge(r3,'err','请求失败'); log2.textContent = String(e); }
 
-  // ③ 带凭据 GET
-  log3.textContent='';
-  let h3 = {}, t3 = '', s3 = 0;
+  // ④ 带凭据 GET（用于 Access 检测）
   try{
-    const r = await fetch(base + '/config?t=' + Date.now(), { credentials:'include' });
+    const r = await fetch(base + '/config?t=' + now(), { credentials:'include' });
     s3 = r.status;
     h3.acao = r.headers.get('access-control-allow-origin');
     h3.acac = r.headers.get('access-control-allow-credentials');
     h3.ct   = r.headers.get('content-type');
     t3 = await r.text();
     log3.textContent = `状态: ${s3}\nACAO: ${h3.acao}\nACAC: ${h3.acac}\nCT: ${h3.ct}\n---\n` + cut(t3);
-    // 带凭据场景：登录 Access 后应 200；未登录 403
-    setBadge(r3, s3===200 || s3===403, `${s3}`);
-  }catch(e){
-    setBadge(r3, false, '请求失败');
-    log3.textContent = String(e);
-  }
+    setBadge(r4, (s3===200 || s3===403)?'ok':'err', `${s3}`);
+  }catch(e){ setBadge(r4,'err','请求失败'); log3.textContent = String(e); }
 
-  // ④ CORS（以无凭据结果为准，检查是否允许当前页面 Origin）
-  const expect = location.origin;
-  const acao = (h2.acao||'').trim();
-  if (!acao){ setBadge(r4, false, '无 access-control-allow-origin 头'); }
-  else if (acao===expect){ setBadge(r4, true, '已允许 ' + acao); }
-  else { setBadge(r4, false, '返回 '+acao+' ≠ 当前 '+expect); }
-
-  // ⑤ 内容类型/UTF-8
-  const ct = (h2.ct || h3.ct || '').toLowerCase();
-  if (ct.includes('charset=utf-8')) setBadge(r5, true, ct);
-  else setBadge(r5, false, ct || '无 content-type');
-
-  // ⑥ JSON 合法/中文显示
+  // ② 策略版本识别（根据 ③/④ 的返回）
+  let ver = '未知';
   try{
-    let parsed = null;
-    let raw = t2 || t3 || '';
-    try{ parsed = JSON.parse(raw); }catch(_){}
-    // v0.07B 结构：{ok:true, data:{...}}
-    const data = (parsed && parsed.data) ? parsed.data : parsed;
-    const notice = data && data.notice;
-    const hasChinese = /[\u4e00-\u9fa5]/.test(raw);
-    const looksEscaped = /\\u[0-9a-fA-F]{4}/.test(raw);
+    if (s2===200 && t2.trim().startsWith('{') && !/\"ok\"\s*:/.test(t2)) ver = 'v0.06B（公开可读）';
+    else if (s3===200 && /\"ok\"\s*:\s*true/.test(t3)) ver = 'v0.07B（完全后台认证）';
+    else if (s2===403 || s3===403) ver = '可能是 v0.07B（需登录 Access）';
+    setBadge(r2, ver==='未知'?'warn':'ok', ver);
+  }catch{ setBadge(r2,'warn','无法判断'); }
 
-    if (!data || typeof data!=='object'){
-      setBadge(r6, false, '不是合法 JSON 对象');
-    } else if (notice && typeof notice==='string' && hasChinese){
-      setBadge(r6, true, '中文正常');
-    } else if (looksEscaped && !ct.includes('charset=utf-8')){
-      setBadge(r6, false, '可能二次转义 + 缺少 UTF-8');
-    } else if (looksEscaped){
-      setBadgeWarn(r6, '内容是 \\uXXXX 形式（可换成直接中文）');
-    } else {
-      setBadgeWarn(r6, '未检测到中文样例，检查 notice 字段');
-    }
-  }catch(e){
-    setBadge(r6, false, '解析失败');
+  // ⑤ CORS（以无凭据为准，检查是否允许当前页面 Origin）
+  const acao = (h2.acao||'').trim();
+  if (!acao) setBadge(r5,'err','无 access-control-allow-origin 响应头');
+  else if (acao===po) setBadge(r5,'ok','已允许 '+acao);
+  else setBadge(r5,'err','返回 '+acao+' ≠ 当前 '+po);
+
+  // ⑥ Content-Type/UTF-8
+  const ct = (h2.ct || h3.ct || '').toLowerCase();
+  if (ct.includes('charset=utf-8')) setBadge(r6,'ok', ct);
+  else setBadge(r6,'err', ct || '无 content-type');
+
+  // ⑦ KV/JSON/中文/二次转义
+  try{
+    const raw = (t2 && s2===200 ? t2 : t3) || '';
+    let parsed = null;
+    try{ parsed = JSON.parse(raw); }catch{}
+    const data = (parsed && parsed.data) ? parsed.data : parsed; // v0.07B包 data
+    const looksEscaped = /\\u[0-9a-fA-F]{4}/.test(raw);
+    const hasZh = /[\u4e00-\u9fa5]/.test(raw);
+    if (!raw) setBadge(r7,'err','无响应内容');
+    else if (!data || typeof data!=='object') setBadge(r7,'err','不是合法 JSON 对象');
+    else if (hasZh) setBadge(r7,'ok', '中文正常');
+    else if (looksEscaped && !ct.includes('charset=utf-8')) setBadge(r7,'err','二次转义 + 缺少 UTF-8');
+    else if (looksEscaped) setBadge(r7,'warn','是 \\uXXXX 形式（可换中文直写）');
+    else setBadge(r7,'warn','未检测到中文样例（检查 notice 字段）');
+  }catch{ setBadge(r7,'err','解析失败'); }
+
+  // 深度诊断：多试几次/不同参数
+  if (deep){
+    await new Promise(r=>setTimeout(r,300));
+    try{ await fetch(base + '/config?deep=1&t='+now()); }catch{}
   }
-};
+}
+
+btnRun.addEventListener('click', ()=>runDiag(false));
+btnDeep.addEventListener('click', ()=>runDiag(true));
 </script>
 </body>
 </html>
